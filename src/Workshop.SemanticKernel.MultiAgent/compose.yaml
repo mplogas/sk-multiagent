@@ -1,0 +1,6 @@
+﻿services:
+  semantickernel-multiagent:
+    image: semantickernel-multiagent
+    build:
+      context: .
+      dockerfile: Dockerfile

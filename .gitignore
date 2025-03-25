@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+
+# Rider
+.idea/
+.idea_modules/
+*.iml
+.RiderSettings/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vcxproj.*
+*.vcxproj.filters
+ipch/
+*.opensdf
+*.sdf
+*.opendb
+*.tlog
+
+# Visual Studio Code
+.vscode/
+
+# OS Generated
+.DS_Store
+Thumbs.db
