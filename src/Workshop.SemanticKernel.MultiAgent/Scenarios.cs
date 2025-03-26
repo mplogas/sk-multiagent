@@ -26,7 +26,6 @@ namespace Workshop.SemanticKernel.MultiAgent
                     {
                         Agents = agents.Where(a => scenarioSettings.TerminationAgents.Contains(a.Name)).ToList(),
                         HistoryVariableName = "history",
-                        MaximumIterations = scenarioSettings.MaxIterations,
                         ResultParser = (result) => result.GetValue<string>()?.Contains(scenarioSettings.TerminationSuccess, StringComparison.InvariantCultureIgnoreCase) ?? false // add more advanced parsing logic here
                     },
                     SelectionStrategy = new KernelFunctionSelectionStrategy(selectionFunction, scenarioKernel)

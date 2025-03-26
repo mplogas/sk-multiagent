@@ -1,4 +1,5 @@
 using Microsoft.SemanticKernel.Agents;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
@@ -40,9 +41,11 @@ namespace Workshop.SemanticKernel.MultiAgent
                     Name = agentSetting.Name,
                     Description = agentSetting.Description,
                     Instructions = agentSetting.Instructions,
-                    Kernel = kernel
+                    Kernel = kernel,
+                    InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System
+                    
                 };
-
+                
                 if (update)
                 {
                     var existingAgent = AvailableAgents.FirstOrDefault(a => a.Name == configuredAgent.Name);

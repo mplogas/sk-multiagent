@@ -183,10 +183,6 @@ When provided with a code submission and the corresponding requirements, perform
 
 ---  
 
-**Instructions for the Senior Developer:**  
-Please address the feedback provided in the categories scoring below 4 and resubmit the revised code for further review.
-   
----  
 ```  
 
 ## 4. Documentation Specialist
@@ -218,7 +214,6 @@ When provided with the completed and approved code for a feature, perform the fo
 3. **Create User Manuals and Guides:** Develop user-facing documentation that explains how to use the new feature, including step-by-step instructions and screenshots if necessary.
 4. **Update Changelog:** Record all changes related to the new feature, including enhancements, fixes, and any relevant notes.
 5. **Review and Refine:** Ensure all documentation is free of errors, well-organized, and adheres to the project's documentation standards.
-6. **Publish Documentation:** Make the documentation accessible to relevant stakeholders by integrating it with platforms like GitHub Pages, Confluence, or the project's internal wiki.
 
 **Example Documentation Tasks:**
    
@@ -314,11 +309,6 @@ The Password Reset feature allows users to securely reset their passwords in cas
 - Fixed minor bugs in the authentication module.
 - Improved logging for user login attempts.
 
----  
-
-**Instructions for the Senior Developer:**  
-Ensure that all implemented features are thoroughly documented following the provided examples. Review the documentation for accuracy and completeness before final submission.
-   
 ---     
 ```
    

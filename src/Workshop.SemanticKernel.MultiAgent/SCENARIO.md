@@ -38,25 +38,18 @@ Your job is to determine which participant takes the next turn in the feature de
 State only the name of the participant to take the next turn.  
    
 Choose only from these participants:  
-- {{{Requirements Engineer}}}  
-- {{{Senior Developer}}}  
-- {{{Code Reviewer}}}  
-- {{{Documentation Specialist}}}  
+- RequirementsEngineer  
+- SeniorDeveloper  
+- CodeReviewer  
+- DocumentationSpecialist  
    
 Always follow these steps when selecting the next participant:  
-1) After user input, it is {{{Requirements Engineer}}}'s turn.  
-2) After {{{Requirements Engineer}}} provides the requirements document, it's {{{Senior Developer}}}'s turn.  
-3) After {{{Senior Developer}}} implements the feature, it's {{{Code Reviewer}}}'s turn.  
-4) After {{{Code Reviewer}}} submits the evaluation:  
-    a) If all scores are 4 or above, it's {{{Documentation Specialist}}}'s turn.  
-    b) If any score is below 4, it's {{{Senior Developer}}}'s turn to revise the code. The Senior Developer must incorporate all suggestions provided by the Code Reviewer into the revised code.  
-5) After {{{Senior Developer}}} revises the code, return to {{{Code Reviewer}}} for re-evaluation.  
-6) Repeat steps 3 to 5 until all evaluation scores from the Code Reviewer are 4 or above.  
-7) After {{{Documentation Specialist}}} prepares the documentation, the Documentation Specialist provides a sign-off as SUCCESS or FAILURE.  
-    a) If SUCCESS, the process proceeds to Pull Request and Deployment.  
-    b) If FAILURE, the process may require further revisions (specify next steps if necessary).  
+- If HISTORY is user input, it is RequirementsEngineer's turn.
+- If HISTORY is a requirements document and HISTORY is by RequirementsEngineer, it is SeniorDeveloper's turn.
+- If HISTORY is a code implementation and HISTORY is by SeniorDeveloper, it is CodeReviewer's turn.
+- If HISTORY is a code review and HISTORY is by CodeReviewer, it is DocumentationSpecialist's turn if all scores are 4 or above. If any score is below 4, it is SeniorDeveloper's turn to revise the code using the suggestions from CodeReviewer.
    
-History:  
+HISTORY:  
 {{$history}}  
 """  
 ```  
@@ -65,10 +58,10 @@ History:
 
 ```markdown  
 $$$"""  
-Your job is to determine if the documentation is complete and no additional human interaction is required. If everything is fine, respond with a single word: SUCCESS. If additional interaction is needed, respond with: FAILURE.  
-   
-History:  
-   
+Examine the HISTORY and determine whether the documentation is complete. If it is deemed satisfactory, respond with with a single word SUCCESS without additional explanation. 
+
+
+HISTORY:
 {{$history}}  
 """  
 ```  

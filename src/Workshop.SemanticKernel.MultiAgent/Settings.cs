@@ -43,8 +43,6 @@ namespace Workshop.SemanticKernel.MultiAgent
             public string TerminatePrompt { get; set; } = string.Empty;
             public List<string> TerminationAgents { get; set; } = new ();
             public string TerminationSuccess { get; set; } = string.Empty;
-            public string TerminationFailure { get; set; } = string.Empty;
-            public int MaxIterations { get; set; } = 10;
             public bool Enabled { get; set; } = true;
             public string Backend { get; set; } = string.Empty;
             public string Model { get; set; } = string.Empty;
