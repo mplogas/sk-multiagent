@@ -2,36 +2,27 @@ using Microsoft.Extensions.Configuration;
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
+    public enum TransformerBackend
+    {
+        OpenAI,
+        AzureOpenAI,
+        Ollama
+    }
+    
     public class Settings
     {
         private readonly IConfigurationRoot configRoot;
 
-        private AzureOpenAISettings azureOpenAI;
-        private OpenAISettings openAI;
-        private OllamaSettings ollama;
-
-        public AzureOpenAISettings AzureOpenAI => this.azureOpenAI ??= this.GetSettings<Settings.AzureOpenAISettings>();
-        public OpenAISettings OpenAI => this.openAI ??= this.GetSettings<Settings.OpenAISettings>();
-        public OllamaSettings Ollama => this.ollama ??= this.GetSettings<Settings.OllamaSettings>();
-
         public class TransformerBackendSettings
         {
             public string ApiKey { get; set; } = string.Empty;
+            public string Endpoint { get; set; } = string.Empty;
+            public TransformerBackend Type { get; set; } = TransformerBackend.AzureOpenAI;
         }
         
         public class OpenAISettings : TransformerBackendSettings
         {
             public string Organization { get; set; } = string.Empty;
-        }
-
-        public class AzureOpenAISettings : TransformerBackendSettings
-        {
-            public string Endpoint { get; set; } = string.Empty;
-        }
-        
-        public class OllamaSettings : TransformerBackendSettings
-        {
-            public string Endpoint { get; set; } = string.Empty;
         }
         
         public class AgentSettings
@@ -51,26 +42,32 @@ namespace Workshop.SemanticKernel.MultiAgent
             public string SelectionPrompt { get; set; } = string.Empty;
             public string TerminatePrompt { get; set; } = string.Empty;
             public List<string> TerminationAgents { get; set; } = new ();
+            public string TerminationSuccess { get; set; } = string.Empty;
+            public string TerminationFailure { get; set; } = string.Empty;
             public int MaxIterations { get; set; } = 10;
             public bool Enabled { get; set; } = true;
-            
+            public string Backend { get; set; } = string.Empty;
+            public string Model { get; set; } = string.Empty;
         }
 
-        // public TSettings GetSettings<TSettings>(string name) =>
-        //     this.configRoot.GetRequiredSection(name).Get<TSettings>()!;
         public TSettings GetSettings<TSettings>(string name) where TSettings : new()
         {
             var section = this.configRoot.GetSection(name);
             return section.Exists() ? section.Get<TSettings>() ?? new TSettings() : new TSettings();
         }
         
-        
-        // private TSettings GetSettings<TSettings>() =>
-        //     this.configRoot.GetRequiredSection(typeof(TSettings).Name).Get<TSettings>()!;
-        private TSettings GetSettings<TSettings>() where TSettings : new()
+        public TransformerBackendSettings GetTransformerBackendSettings(TransformerBackend backend)
         {
-            var section = this.configRoot.GetSection(typeof(TSettings).Name);
-            return section.Exists() ? section.Get<TSettings>() ?? new TSettings() : new TSettings();
+            switch (backend)
+            {
+                case TransformerBackend.OpenAI:
+                    return this.GetSettings<OpenAISettings>("OpenAI"); 
+                case TransformerBackend.AzureOpenAI:
+                    return this.GetSettings<TransformerBackendSettings>("AzureOpenAI");
+                case TransformerBackend.Ollama:
+                default:
+                    return this.GetSettings<TransformerBackendSettings>("Ollama");
+            }
         }
         
         public Settings()

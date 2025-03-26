@@ -5,71 +5,44 @@ namespace Workshop.SemanticKernel.MultiAgent
 
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var settings = new Settings();
-            var scenarios = settings.GetSettings<List<Settings.ScenarioSettings>>("scenarios");
-            var agents = settings.GetSettings<List<Settings.AgentSettings>>("agents");
-
-            var activeScenarios = new List<Scenario>();
-            foreach (var scenario in scenarios)
-            {
-                if(!scenario.Enabled || scenario.Agents.Count == 0)
-                {
-                    Console.WriteLine($"Scenario {scenario.Name} is not enabled or has no agents.");
-                    continue;
-                }
-                
-                var activeAgents = new List<ChatCompletionAgent>();
-                foreach (var agent in scenario.Agents)
-                {
-                    var agentSettings = agents.FirstOrDefault(a => a.Name == agent);
-                    if (agentSettings == null)
-                    {
-                        Console.WriteLine($"Agent {agent} not found.");
-                        continue;
-                    }
-                    
-                    Settings.TransformerBackendSettings backend;
-                    switch (agentSettings.Backend)
-                    {
-                        case "openai":
-                            backend = settings.OpenAI;
-                            break;
-                        case "azureopenai":
-                            backend = settings.AzureOpenAI;
-                            break;
-                        case "ollama":
-                            backend = settings.Ollama;
-                            break;
-                        default:
-                            Console.WriteLine($"Unknown backend: {agentSettings.Backend}");
-                            continue;
-                    }
+            var agents = new Agents();
+            agents.InitializeAgents(settings);
             
-                    var kernel = KernelFactory.CreateKernel(backend, agentSettings.Model);
-                    var configuredAgent = new ChatCompletionAgent
-                    {
-                        Name = agentSettings.Name,
-                        Description = agentSettings.Description,
-                        Instructions = agentSettings.Instructions,
-                        Kernel = kernel
-                    };
-                    
-                    activeAgents.Add(configuredAgent);
-                }
-                var newScenario = new Scenario();
-                newScenario.Initialize(scenario, activeAgents);
-                activeScenarios.Add(newScenario);
+            var scenarios = new Scenarios();
+            scenarios.Initialize(settings, agents.AvailableAgents);
+            
+     
+            // get the prompt from console.readline and run on a predefined scenario
+            // that obviously doesn't make a lot of sense for a console application but can be easily extended for a webapi / desktop application
+            Console.WriteLine("The following scenarios are available:");
+            foreach (var availableScenario in scenarios.GetAvailableScenarios())
+            {
+                Console.WriteLine($"\t{availableScenario}");
+            }
+            Console.WriteLine("Please select a scenario:");
+            var scenarioName = Console.ReadLine();
+            if (string.IsNullOrEmpty(scenarioName) || !scenarios.GetAvailableScenarios().Contains(scenarioName))
+            {
+                Console.WriteLine("No scenario valid selected. Exiting.");
+                return;
             }
             
-            // get the prompt from console.readline and run all activeScenarios
-            // that obviously doesn't make a lot of sense for a console application but can be easily extended for a webapi / desktop application
+            Console.WriteLine("Please enter a prompt:");
+            var prompt = Console.ReadLine();
+            if (string.IsNullOrEmpty(prompt))
+            {
+                Console.WriteLine("No prompt entered. Exiting.");
+                return;
+            }
             
-            
- 
-    
-            Console.WriteLine("Hello, World!");
+            await scenarios.ExecuteAsync(scenarioName, prompt);
+
+
+
+            Console.ReadLine();
         }
          
     }
