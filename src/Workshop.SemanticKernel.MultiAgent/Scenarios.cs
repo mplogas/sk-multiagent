@@ -17,7 +17,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             public void Initialize(Settings.ScenarioSettings scenarioSettings, Kernel scenarioKernel, List<ChatCompletionAgent> agents)
             {
                 
-                var terminateFunction = AgentGroupChat.CreatePromptFunctionForStrategy(scenarioSettings.TerminatePrompt);
+                var terminateFunction = AgentGroupChat.CreatePromptFunctionForStrategy(scenarioSettings.TerminationPrompt);
                 var selectionFunction = AgentGroupChat.CreatePromptFunctionForStrategy(scenarioSettings.SelectionPrompt);
             
                 chat.ExecutionSettings = new AgentGroupChatSettings 
@@ -47,7 +47,7 @@ namespace Workshop.SemanticKernel.MultiAgent
                 chat.AddChatMessage(new ChatMessageContent(AuthorRole.User, prompt));
                 await foreach (var content in chat.InvokeAsync())
                 {
-                    Console.WriteLine();
+                   Console.WriteLine();
                     Console.WriteLine($"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'");
                     Console.WriteLine();
                 }
