@@ -40,7 +40,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             public string Description { get; set; } = string.Empty;
             public List<string> Agents { get; set; } = new ();
             public string SelectionPrompt { get; set; } = string.Empty;
-            public string TerminatePrompt { get; set; } = string.Empty;
+            public string TerminationPrompt { get; set; } = string.Empty;
             public List<string> TerminationAgents { get; set; } = new ();
             public string TerminationSuccess { get; set; } = string.Empty;
             public bool Enabled { get; set; } = true;
