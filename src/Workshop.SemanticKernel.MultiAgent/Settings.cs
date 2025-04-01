@@ -12,7 +12,7 @@ namespace Workshop.SemanticKernel.MultiAgent
     
     public class Settings
     {
-        private readonly IConfigurationRoot configRoot;
+        private readonly IConfigurationRoot _configRoot;
 
         public class TransformerBackendSettings
         {
@@ -59,7 +59,7 @@ namespace Workshop.SemanticKernel.MultiAgent
 
         public TSettings GetSettings<TSettings>(string name) where TSettings : new()
         {
-            var section = this.configRoot.GetSection(name);
+            var section = this._configRoot.GetSection(name);
             return section.Exists() ? section.Get<TSettings>() ?? new TSettings() : new TSettings();
         }
         public TransformerBackendSettings GetTransformerBackendSettings(TransformerBackend backend)
@@ -82,7 +82,7 @@ namespace Workshop.SemanticKernel.MultiAgent
         {
             var basePath = File.Exists("/config/appsettings.json") ? "/config" : AppContext.BaseDirectory;
             
-            this.configRoot =
+            this._configRoot =
                 new ConfigurationBuilder()
                     .SetBasePath(basePath)
                     .AddJsonFile("appsettings.json", false)

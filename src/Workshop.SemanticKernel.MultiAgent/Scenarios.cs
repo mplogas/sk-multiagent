@@ -8,8 +8,8 @@ namespace Workshop.SemanticKernel.MultiAgent
 {
     public class Scenarios
     {
-        private bool isInitialized = false;
-        private Dictionary<string, Scenario> activeScenarios = new Dictionary<string, Scenario>();
+        private bool _isInitialized = false;
+        private readonly Dictionary<string, Scenario> _activeScenarios = new Dictionary<string, Scenario>();
 
         private class Scenario
         {
@@ -93,20 +93,20 @@ namespace Workshop.SemanticKernel.MultiAgent
                 
                 var s = new Scenario(loggerFactory);
                 s.Initialize(scenario, KernelFactory.CreateKernel(loggerFactory, settings, scenario.Model, KernelFactory.ConvertFrom(scenario.Backend)), activeAgents);
-                activeScenarios.Add(scenario.Name, s);
+                _activeScenarios.Add(scenario.Name, s);
             }
             
-            isInitialized = true;
+            _isInitialized = true;
         }
 
         public Task ExecuteAsync(string scenarioName, string prompt)
         {
-            if (!isInitialized)
+            if (!_isInitialized)
             {
                 throw new InvalidOperationException("Scenarios not initialized. Call Initialize() first.");
             }
 
-            if (activeScenarios.TryGetValue(scenarioName, out var scenario))
+            if (_activeScenarios.TryGetValue(scenarioName, out var scenario))
             {
                 return scenario.Execute(prompt);
             }
@@ -118,12 +118,12 @@ namespace Workshop.SemanticKernel.MultiAgent
 
         public List<string> GetAvailableScenarios()
         {
-            if (!isInitialized)
+            if (!_isInitialized)
             {
                 throw new InvalidOperationException("Scenarios not initialized. Call Initialize() first.");
             }
 
-            return activeScenarios.Keys.ToList();
+            return _activeScenarios.Keys.ToList();
         }
     }
 }

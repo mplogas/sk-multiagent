@@ -8,13 +8,13 @@ namespace Workshop.SemanticKernel.MultiAgent
 {
     public class Agents
     {
-        public List<ChatCompletionAgent> AvailableAgents { get; set; } = new List<ChatCompletionAgent>();
+        private readonly List<ChatCompletionAgent> _availableAgents = new List<ChatCompletionAgent>();
 
         public void InitializeAgents(ILoggerFactory loggerFactory, Settings settings, ToolFactory toolFactory, bool update = false)
         {
             if(!update)
             {
-                AvailableAgents.Clear();
+                _availableAgents.Clear();
             }
             var logger = loggerFactory.CreateLogger<Agents>();
             
@@ -66,18 +66,22 @@ namespace Workshop.SemanticKernel.MultiAgent
                 
                 if (update)
                 {
-                    var existingAgent = AvailableAgents.FirstOrDefault(a => a.Name == configuredAgent.Name);
+                    var existingAgent = _availableAgents.FirstOrDefault(a => a.Name == configuredAgent.Name);
                     if (existingAgent != null)
                     {
                         // unfortunately, ChatCompletionAgent does not implement live update of its properties
                         // this may create a race condition if the agent is used in multiple threads
-                        AvailableAgents.Remove(existingAgent);
+                        _availableAgents.Remove(existingAgent);
                     }
                 }
 
-                AvailableAgents.Add(configuredAgent);
+                _availableAgents.Add(configuredAgent);
             }
         }
         
+        public List<ChatCompletionAgent> GetAvailableAgents()
+        {
+            return _availableAgents;
+        }
     }
 }

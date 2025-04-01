@@ -31,7 +31,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             agents.InitializeAgents(loggerFactory, settings, tools);
             
             var scenarios = new Scenarios();
-            scenarios.Initialize(loggerFactory, settings, agents.AvailableAgents);
+            scenarios.Initialize(loggerFactory, settings, agents.GetAvailableAgents());
             
      
             // get the prompt from console.readline and run on a predefined scenario
