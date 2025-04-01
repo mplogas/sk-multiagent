@@ -1,4 +1,6 @@
-﻿using Microsoft.SemanticKernel.Agents;
+﻿using Microsoft.Extensions.Logging; // Core logging interfaces
+using Microsoft.SemanticKernel;
+using System; // For AppContext
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
@@ -7,12 +9,30 @@ namespace Workshop.SemanticKernel.MultiAgent
     {
         public static async Task Main(string[] args)
         {
+            // --- Simple Logging Setup ---
+            // normally you'd go with DI and preferably OpenTelemetry
+            
+            // Create a logger factory specifically for console output
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .SetMinimumLevel(LogLevel.Trace) // Set level to Trace for maximum detail
+                    .AddConsole(); // Add the simple console logger provider
+                // Optional: Add filters if needed later
+                // builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Debug);
+            });
+            // Still needed even with basic logging if you want connector details.
+            AppContext.SetSwitch("Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive", true); 
+            var logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("Simple console logging configured.");
+            
             var settings = new Settings();
             var agents = new Agents();
-            agents.InitializeAgents(settings);
+            var tools = new ToolFactory(settings);
+            agents.InitializeAgents(settings, tools, loggerFactory);
             
             var scenarios = new Scenarios();
-            scenarios.Initialize(settings, agents.AvailableAgents);
+            scenarios.Initialize(loggerFactory, settings, agents.AvailableAgents);
             
      
             // get the prompt from console.readline and run on a predefined scenario

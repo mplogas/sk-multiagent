@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
@@ -13,6 +14,14 @@ namespace Workshop.SemanticKernel.MultiAgent
         private class Scenario
         {
             private AgentGroupChat chat = new();
+            private readonly ILogger<Scenario> _logger;
+            private readonly ILoggerFactory _loggerFactory;
+
+            public Scenario(ILoggerFactory loggerFactory)
+            {
+                _logger = loggerFactory.CreateLogger<Scenario>();
+                _loggerFactory = loggerFactory;
+            }
 
             public void Initialize(Settings.ScenarioSettings scenarioSettings, Kernel scenarioKernel, List<ChatCompletionAgent> agents)
             {
@@ -38,7 +47,7 @@ namespace Workshop.SemanticKernel.MultiAgent
                 foreach (var agent in agents)
                 {
                     chat.AddAgent(agent);
-                    Console.WriteLine($"Agent {agent.Name} configured in scenario {scenarioSettings.Name}");
+                    _logger.LogInformation($"Agent {agent.Name} added to scenario {scenarioSettings.Name}");
                 }
             }
             
@@ -47,23 +56,24 @@ namespace Workshop.SemanticKernel.MultiAgent
                 chat.AddChatMessage(new ChatMessageContent(AuthorRole.User, prompt));
                 await foreach (var content in chat.InvokeAsync())
                 {
-                   Console.WriteLine();
-                    Console.WriteLine($"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'");
-                    Console.WriteLine();
+                    _logger.LogInformation("----------------------------------------");
+                    _logger.LogInformation($"# {content.Role} - {content.AuthorName ?? "*"}: '{content.Content}'");
+                    _logger.LogInformation("----------------------------------------");
                 }
-            
-                Console.WriteLine($"# IS COMPLETE: {chat.IsComplete}");
+                
+                _logger.LogInformation($"# IS COMPLETE: {chat.IsComplete}");
             }
         }
         
-        public void Initialize(Settings settings, List<ChatCompletionAgent> agents)
+        public void Initialize(ILoggerFactory loggerFactory, Settings settings, List<ChatCompletionAgent> agents)
         {
             var scenarios = settings.GetSettings<List<Settings.ScenarioSettings>>("scenarios");
+            var logger = loggerFactory.CreateLogger<Scenarios>();
             foreach (var scenario in scenarios)
             {
                 if (!scenario.Enabled || scenario.Agents.Count == 0)
                 {
-                    Console.WriteLine($"Scenario {scenario.Name} is not enabled or has no agents.");
+                    logger.LogWarning($"Scenario {scenario.Name} is not enabled or has no agents.");
                     continue;
                 }
                 
@@ -74,15 +84,15 @@ namespace Workshop.SemanticKernel.MultiAgent
                     var agentSettings = agents.FirstOrDefault(a => a.Name == agent);
                     if (agentSettings == null)
                     {
-                        Console.WriteLine($"Agent {agent} not found.");
+                        logger.LogWarning($"Agent {agent} not found.");
                         continue;
                     }
                     
                     activeAgents.Add(agentSettings);
                 }
                 
-                var s = new Scenario();
-                s.Initialize(scenario, KernelFactory.CreateKernel(settings, scenario.Model, KernelFactory.ConvertFrom(scenario.Backend)), activeAgents);
+                var s = new Scenario(loggerFactory);
+                s.Initialize(scenario, KernelFactory.CreateKernel(loggerFactory, settings, scenario.Model, KernelFactory.ConvertFrom(scenario.Backend)), activeAgents);
                 activeScenarios.Add(scenario.Name, s);
             }
             

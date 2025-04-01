@@ -1,5 +1,8 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel;
+
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
@@ -7,44 +10,59 @@ namespace Workshop.SemanticKernel.MultiAgent
     {
         public List<ChatCompletionAgent> AvailableAgents { get; set; } = new List<ChatCompletionAgent>();
 
-        public void InitializeAgents(Settings settings, bool update = false)
+        public void InitializeAgents(Settings settings, ToolFactory toolFactory, ILoggerFactory loggerFactory, bool update = false)
         {
             if(!update)
             {
                 AvailableAgents.Clear();
             }
+            var logger = loggerFactory.CreateLogger<Agents>();
             
             var agentSettings = settings.GetSettings<List<Settings.AgentSettings>>("agents");
             
             foreach (var agentSetting in agentSettings)
             {
-                TransformerBackend backend;
-                switch (agentSetting.Backend)
+                var kernel = KernelFactory.CreateKernel(loggerFactory, settings, agentSetting.Model, KernelFactory.ConvertFrom(agentSetting.Backend));
+
+                ChatCompletionAgent configuredAgent;
+                if(agentSetting.Tools.Count > 0)
                 {
-                    case "openai":
-                        backend = TransformerBackend.OpenAI;
-                        break;
-                    case "azureopenai":
-                        backend = TransformerBackend.AzureOpenAI;
-                        break;
-                    case "ollama":
-                        backend = TransformerBackend.Ollama;
-                        break;
-                    default:
-                        Console.WriteLine($"Unknown backend: {agentSetting.Backend}");
-                        continue;
-                }
-                
-                var kernel = KernelFactory.CreateKernel(settings, agentSetting.Model, backend);
-                var configuredAgent = new ChatCompletionAgent
-                {
-                    Name = agentSetting.Name,
-                    Description = agentSetting.Description,
-                    Instructions = agentSetting.Instructions,
-                    Kernel = kernel,
-                    InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System
+                    foreach (var toolName in agentSetting.Tools)
+                    {
+                        var tool = toolFactory.GetTool(toolName);
+                        if (tool != null)
+                        {
+                            kernel.Plugins.Add(tool);
+                            logger.LogInformation($"Tool '{toolName}' added to agent.");
+                        }
+                        else
+                        {
+                            logger.LogWarning($"Tool '{toolName}' not found.");
+                        }
+                    }
                     
-                };
+                    configuredAgent = new ChatCompletionAgent
+                    {
+                        Name = agentSetting.Name,
+                        Description = agentSetting.Description,
+                        Instructions = agentSetting.Instructions,
+                        Kernel = kernel,
+                        InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System,
+                        Arguments = new KernelArguments(KernelFactory.GetExecutionSettings(KernelFactory.ConvertFrom(agentSetting.Backend)))
+                    };
+                }
+                else
+                {
+                    // no tools, so we can use the default agent
+                    configuredAgent = new ChatCompletionAgent
+                    {
+                        Name = agentSetting.Name,
+                        Description = agentSetting.Description,
+                        Instructions = agentSetting.Instructions,
+                        Kernel = kernel,
+                        InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System,
+                    };
+                }
                 
                 if (update)
                 {
@@ -60,5 +78,6 @@ namespace Workshop.SemanticKernel.MultiAgent
                 AvailableAgents.Add(configuredAgent);
             }
         }
+        
     }
 }
