@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel;
 
 namespace Workshop.SemanticKernel.MultiAgent
@@ -7,16 +8,18 @@ namespace Workshop.SemanticKernel.MultiAgent
     public class ToolFactory
     {
         private readonly Dictionary<string, Func<KernelPlugin>> _pluginRegistry = new();
+        private readonly ILogger<ToolFactory> _logger;
 
-        
-        public ToolFactory(Settings settings)
+
+        public ToolFactory(ILoggerFactory loggerFactory, Settings settings)
         {
+            _logger = loggerFactory.CreateLogger<ToolFactory>();
             var availableTools = settings.GetSettings<List<Settings.ToolSettings>>("tools");
             foreach (var tool in availableTools)
             {
                 if (_pluginRegistry.ContainsKey(tool.Name))
                 {
-                    Debug.WriteLine($"Tool '{tool.Name}' is already registered. Skipping registration.");
+                    _logger.LogWarning($"Tool '{tool.Name}' is already registered. Skipping registration.");
                     continue;
                 }
 
@@ -25,14 +28,14 @@ namespace Workshop.SemanticKernel.MultiAgent
                     case "FileSystem":
                         if(tool.Parameters.Count == 0 || !tool.Parameters.ContainsKey("basepath"))
                         {
-                            Debug.WriteLine($"Tool '{tool.Name}' requires 'basePath' parameter. Skipping registration.");
+                            _logger.LogWarning($"Tool '{tool.Name}' requires 'basePath' parameter. Skipping registration.");
                             continue;
                             
                         }
                         Register("FileSystem", () => KernelPluginFactory.CreateFromObject(new FileSystemPlugin( tool.Parameters["basepath"])));
                         break;
                     default:
-                        Debug.WriteLine($"Tool '{tool.Name}' is not supported. Skipping registration.");
+                        _logger.LogWarning($"Tool '{tool.Name}' is not supported. Skipping registration.");
                         break;
                 }
             }
@@ -46,7 +49,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             }
             else
             {
-                Debug.WriteLine($"Tool '{toolName}' is not registered.");
+                _logger.LogWarning($"Tool '{toolName}' is not registered.");
                 return null;
             }
         }
@@ -54,7 +57,7 @@ namespace Workshop.SemanticKernel.MultiAgent
         private void Register(string toolName, Func<KernelPlugin> pluginFactory)
         {
             _pluginRegistry[toolName] = pluginFactory;
-            Console.WriteLine($"Tool '{toolName}' is registered.");
+            _logger.LogInformation($"Tool '{toolName}' is registered.");
         }
     }
     

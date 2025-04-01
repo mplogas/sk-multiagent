@@ -10,7 +10,7 @@ namespace Workshop.SemanticKernel.MultiAgent
     {
         public List<ChatCompletionAgent> AvailableAgents { get; set; } = new List<ChatCompletionAgent>();
 
-        public void InitializeAgents(Settings settings, ToolFactory toolFactory, ILoggerFactory loggerFactory, bool update = false)
+        public void InitializeAgents(ILoggerFactory loggerFactory, Settings settings, ToolFactory toolFactory, bool update = false)
         {
             if(!update)
             {
@@ -33,7 +33,7 @@ namespace Workshop.SemanticKernel.MultiAgent
                         if (tool != null)
                         {
                             kernel.Plugins.Add(tool);
-                            logger.LogInformation($"Tool '{toolName}' added to agent.");
+                            logger.LogInformation($"Tool '{toolName}' added to agent {agentSetting.Name}.");
                         }
                         else
                         {

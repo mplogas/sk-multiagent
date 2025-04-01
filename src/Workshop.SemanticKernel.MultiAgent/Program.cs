@@ -27,8 +27,8 @@ namespace Workshop.SemanticKernel.MultiAgent
             
             var settings = new Settings();
             var agents = new Agents();
-            var tools = new ToolFactory(settings);
-            agents.InitializeAgents(settings, tools, loggerFactory);
+            var tools = new ToolFactory(loggerFactory, settings);
+            agents.InitializeAgents(loggerFactory, settings, tools);
             
             var scenarios = new Scenarios();
             scenarios.Initialize(loggerFactory, settings, agents.AvailableAgents);
