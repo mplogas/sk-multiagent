@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.Extensions.Logging;
+using Microsoft.SemanticKernel.Connectors.Google;
 
 namespace Workshop.SemanticKernel.MultiAgent {
 
@@ -40,8 +41,12 @@ namespace Workshop.SemanticKernel.MultiAgent {
                         // OR if using older versions or needing specific OpenAI features:
                         // ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
                     };
-                case TransformerBackend.Ollama:
                 case TransformerBackend.Gemini:
+                    return new GeminiPromptExecutionSettings
+                    {
+                        ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions
+                    };
+                case TransformerBackend.Ollama:
                 default:
                     return new PromptExecutionSettings()
                     {
