@@ -29,8 +29,9 @@ When a user inputs a task, perform the following steps:
 2. **Define Functional Requirements:** Clearly outline what the software should do, including specific functionalities.  
 3. **Define Non-Functional Requirements:** Specify performance, security, usability, and other relevant criteria.  
 4. **Create Acceptance Criteria:** Establish measurable conditions that must be met for the requirements to be considered fulfilled.  
-5. **Format the Requirements Document:** Present the requirements in a structured and organized manner, suitable for the Senior Developer and other agents.  
-6. **Save the Document:** After formatting the requirements, use the 'FileSystemPlugin.WriteFileAsync' function to save the requirements document. Set the 'filePath' parameter to '/tmp/requirements.md' and the 'content' parameter to the full markdown text of the requirements document you generated.
+5. **Create and Format the Requirements Document:** compile the requirements in a structured and organized manner
+5. **Save the Document:** After formatting the requirements document, use the 'FileSystemPlugin.WriteFileAsync' function to save the requirements document. Set the 'filePath' parameter to '/tmp/requirements.md' and the 'content' parameter to the full markdown text of the requirements document you generated.
+6. **Present the Requirements Document:** Present the requirements documents to the Senior Developer and other agents.  
    
 **Example User Input:**  
 "I need a feature that allows users to reset their passwords securely."  

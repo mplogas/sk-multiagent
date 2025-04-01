@@ -16,13 +16,12 @@ namespace Workshop.SemanticKernel.MultiAgent
             using var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder
-                    .SetMinimumLevel(LogLevel.Trace) // Set level to Trace for maximum detail
-                    .AddConsole(); // Add the simple console logger provider
+                    .SetMinimumLevel(LogLevel.Trace)
+                    .AddConsole();
                 // Optional: Add filters if needed later
                 // builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Debug);
             });
-            // Still needed even with basic logging if you want connector details.
-            AppContext.SetSwitch("Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive", true); 
+            
             var logger = loggerFactory.CreateLogger<Program>();
             logger.LogInformation("Simple console logging configured.");
             
@@ -46,7 +45,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             var scenarioName = Console.ReadLine();
             if (string.IsNullOrEmpty(scenarioName) || !scenarios.GetAvailableScenarios().Contains(scenarioName))
             {
-                Console.WriteLine("No scenario valid selected. Exiting.");
+                logger.LogWarning("No scenario valid selected. Exiting.");
                 return;
             }
             
@@ -54,7 +53,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             var prompt = Console.ReadLine();
             if (string.IsNullOrEmpty(prompt))
             {
-                Console.WriteLine("No prompt entered. Exiting.");
+                logger.LogWarning("No prompt entered. Exiting.");
                 return;
             }
             
