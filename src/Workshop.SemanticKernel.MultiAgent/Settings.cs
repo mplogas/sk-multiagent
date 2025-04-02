@@ -6,12 +6,13 @@ namespace Workshop.SemanticKernel.MultiAgent
     {
         OpenAI,
         AzureOpenAI,
-        Ollama
+        Ollama,
+        Gemini
     }
     
     public class Settings
     {
-        private readonly IConfigurationRoot configRoot;
+        private readonly IConfigurationRoot _configRoot;
 
         public class TransformerBackendSettings
         {
@@ -25,6 +26,13 @@ namespace Workshop.SemanticKernel.MultiAgent
             public string Organization { get; set; } = string.Empty;
         }
         
+        public class ToolSettings
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Description { get; set; } = string.Empty;
+            public Dictionary<string, string> Parameters { get; set; } = new ();
+        }
+        
         public class AgentSettings
         {
             public string Name { get; set; } = string.Empty;
@@ -32,6 +40,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             public string Backend { get; set; } = string.Empty;
             public string Instructions { get; set; } = string.Empty;
             public string Model { get; set; } = string.Empty;
+            public List<string> Tools { get; set; } = new List<string>();
         }
         
         public class ScenarioSettings
@@ -50,10 +59,9 @@ namespace Workshop.SemanticKernel.MultiAgent
 
         public TSettings GetSettings<TSettings>(string name) where TSettings : new()
         {
-            var section = this.configRoot.GetSection(name);
+            var section = this._configRoot.GetSection(name);
             return section.Exists() ? section.Get<TSettings>() ?? new TSettings() : new TSettings();
         }
-        
         public TransformerBackendSettings GetTransformerBackendSettings(TransformerBackend backend)
         {
             switch (backend)
@@ -62,6 +70,8 @@ namespace Workshop.SemanticKernel.MultiAgent
                     return this.GetSettings<OpenAISettings>("OpenAI"); 
                 case TransformerBackend.AzureOpenAI:
                     return this.GetSettings<TransformerBackendSettings>("AzureOpenAI");
+                case TransformerBackend.Gemini:
+                    return this.GetSettings<TransformerBackendSettings>("GoogleAI");
                 case TransformerBackend.Ollama:
                 default:
                     return this.GetSettings<TransformerBackendSettings>("Ollama");
@@ -72,7 +82,7 @@ namespace Workshop.SemanticKernel.MultiAgent
         {
             var basePath = File.Exists("/config/appsettings.json") ? "/config" : AppContext.BaseDirectory;
             
-            this.configRoot =
+            this._configRoot =
                 new ConfigurationBuilder()
                     .SetBasePath(basePath)
                     .AddJsonFile("appsettings.json", false)

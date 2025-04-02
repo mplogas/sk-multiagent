@@ -1,64 +1,87 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel;
+
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
     public class Agents
     {
-        public List<ChatCompletionAgent> AvailableAgents { get; set; } = new List<ChatCompletionAgent>();
+        private readonly List<ChatCompletionAgent> _availableAgents = new List<ChatCompletionAgent>();
 
-        public void InitializeAgents(Settings settings, bool update = false)
+        public void InitializeAgents(ILoggerFactory loggerFactory, Settings settings, ToolFactory toolFactory, bool update = false)
         {
             if(!update)
             {
-                AvailableAgents.Clear();
+                _availableAgents.Clear();
             }
+            var logger = loggerFactory.CreateLogger<Agents>();
             
             var agentSettings = settings.GetSettings<List<Settings.AgentSettings>>("agents");
             
             foreach (var agentSetting in agentSettings)
             {
-                TransformerBackend backend;
-                switch (agentSetting.Backend)
+                var kernel = KernelFactory.CreateKernel(loggerFactory, settings, agentSetting.Model, KernelFactory.ConvertFrom(agentSetting.Backend));
+
+                ChatCompletionAgent configuredAgent;
+                if(agentSetting.Tools.Count > 0)
                 {
-                    case "openai":
-                        backend = TransformerBackend.OpenAI;
-                        break;
-                    case "azureopenai":
-                        backend = TransformerBackend.AzureOpenAI;
-                        break;
-                    case "ollama":
-                        backend = TransformerBackend.Ollama;
-                        break;
-                    default:
-                        Console.WriteLine($"Unknown backend: {agentSetting.Backend}");
-                        continue;
-                }
-                
-                var kernel = KernelFactory.CreateKernel(settings, agentSetting.Model, backend);
-                var configuredAgent = new ChatCompletionAgent
-                {
-                    Name = agentSetting.Name,
-                    Description = agentSetting.Description,
-                    Instructions = agentSetting.Instructions,
-                    Kernel = kernel,
-                    InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System
+                    foreach (var toolName in agentSetting.Tools)
+                    {
+                        var tool = toolFactory.GetTool(toolName);
+                        if (tool != null)
+                        {
+                            kernel.Plugins.Add(tool);
+                            logger.LogInformation($"Tool '{toolName}' added to agent {agentSetting.Name}.");
+                        }
+                        else
+                        {
+                            logger.LogWarning($"Tool '{toolName}' not found.");
+                        }
+                    }
                     
-                };
+                    configuredAgent = new ChatCompletionAgent
+                    {
+                        Name = agentSetting.Name,
+                        Description = agentSetting.Description,
+                        Instructions = agentSetting.Instructions,
+                        Kernel = kernel,
+                        InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System,
+                        Arguments = new KernelArguments(KernelFactory.GetExecutionSettings(KernelFactory.ConvertFrom(agentSetting.Backend)))
+                    };
+                }
+                else
+                {
+                    // no tools, so we can use the default agent
+                    configuredAgent = new ChatCompletionAgent
+                    {
+                        Name = agentSetting.Name,
+                        Description = agentSetting.Description,
+                        Instructions = agentSetting.Instructions,
+                        Kernel = kernel,
+                        InstructionsRole = (agentSetting.Model.Equals("o1-mini", StringComparison.InvariantCultureIgnoreCase) || agentSetting.Model.Equals("o3-mini", StringComparison.InvariantCultureIgnoreCase)) ? AuthorRole.User : AuthorRole.System,
+                    };
+                }
                 
                 if (update)
                 {
-                    var existingAgent = AvailableAgents.FirstOrDefault(a => a.Name == configuredAgent.Name);
+                    var existingAgent = _availableAgents.FirstOrDefault(a => a.Name == configuredAgent.Name);
                     if (existingAgent != null)
                     {
                         // unfortunately, ChatCompletionAgent does not implement live update of its properties
                         // this may create a race condition if the agent is used in multiple threads
-                        AvailableAgents.Remove(existingAgent);
+                        _availableAgents.Remove(existingAgent);
                     }
                 }
 
-                AvailableAgents.Add(configuredAgent);
+                _availableAgents.Add(configuredAgent);
             }
+        }
+        
+        public List<ChatCompletionAgent> GetAvailableAgents()
+        {
+            return _availableAgents;
         }
     }
 }

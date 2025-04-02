@@ -1,4 +1,6 @@
-﻿using Microsoft.SemanticKernel.Agents;
+﻿using Microsoft.Extensions.Logging; // Core logging interfaces
+using Microsoft.SemanticKernel;
+using System; // For AppContext
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
@@ -7,12 +9,29 @@ namespace Workshop.SemanticKernel.MultiAgent
     {
         public static async Task Main(string[] args)
         {
+            // --- Simple Logging Setup ---
+            // normally you'd go with DI and preferably OpenTelemetry
+            
+            // Create a logger factory specifically for console output
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .SetMinimumLevel(LogLevel.Information)
+                    .AddConsole();
+                // Optional: Add filters if needed later
+                // builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Debug);
+            });
+            
+            var logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("Simple console logging configured.");
+            
             var settings = new Settings();
             var agents = new Agents();
-            agents.InitializeAgents(settings);
+            var tools = new ToolFactory(loggerFactory, settings);
+            agents.InitializeAgents(loggerFactory, settings, tools);
             
             var scenarios = new Scenarios();
-            scenarios.Initialize(settings, agents.AvailableAgents);
+            scenarios.Initialize(loggerFactory, settings, agents.GetAvailableAgents());
             
      
             // get the prompt from console.readline and run on a predefined scenario
@@ -26,7 +45,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             var scenarioName = Console.ReadLine();
             if (string.IsNullOrEmpty(scenarioName) || !scenarios.GetAvailableScenarios().Contains(scenarioName))
             {
-                Console.WriteLine("No scenario valid selected. Exiting.");
+                logger.LogWarning("No scenario valid selected. Exiting.");
                 return;
             }
             
@@ -34,7 +53,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             var prompt = Console.ReadLine();
             if (string.IsNullOrEmpty(prompt))
             {
-                Console.WriteLine("No prompt entered. Exiting.");
+                logger.LogWarning("No prompt entered. Exiting.");
                 return;
             }
             
