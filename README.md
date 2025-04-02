@@ -2,7 +2,7 @@
 
 Welcome! This project demonstrates a collaborative multi-agent system built using the experimental agent features in Microsoft Semantic Kernel. It simulates a simplified software development lifecycle, showcasing how specialized AI agents can work together to take a feature request from user input to documented code.
 
-This repository contains the code demonstrated during the Global AI bootcamp session "Semantic Kernel Multi-Agent Scenarios" (2025-04-11) and serves as a practical example for the code deep-dive.
+This repository contains the code demonstrated during the **Global AI bootcamp** session **Semantic Kernel Multi-Agent Scenarios** *(2025-04-11)* and serves as a practical example for the code deep-dive.
 
 ## ✨ Overview
 
