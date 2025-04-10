@@ -361,7 +361,7 @@ To visualize how these four agents interact within the Semantic Kernel framework
 ### Diagrammatic Representation  
    
 ```mermaid  
-graph TD  
+graph LR  
     A[User Input Task] --> B[Requirements Engineer]  
     B --> C[Senior Developer]  
     C --> D[Code Reviewer]  
