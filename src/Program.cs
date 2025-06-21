@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Logging; // Core logging interfaces
-using Microsoft.SemanticKernel;
-using System; // For AppContext
-using System.Collections.Generic; // For List
-using System.Linq; // For ToList
+﻿using Microsoft.Extensions.Logging; 
 
 namespace Workshop.SemanticKernel.MultiAgent
 {
