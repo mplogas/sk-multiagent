@@ -151,7 +151,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             try
             {
                 // Critical step: Resolve the requested path to its absolute, canonical form
-                string requestedFullPath = Path.GetFullPath(requestedPath);
+                var requestedFullPath = Path.GetFullPath(requestedPath);
 
                 // Check if the canonical path starts with the allowed base directory
                 // Use OrdinalIgnoreCase for cross-platform compatibility

@@ -44,7 +44,7 @@ namespace Workshop.SemanticKernel.MultiAgent {
                 case TransformerBackend.Gemini:
                     return new GeminiPromptExecutionSettings
                     {
-                        ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions
+                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
                     };
                 case TransformerBackend.Ollama:
                 default:

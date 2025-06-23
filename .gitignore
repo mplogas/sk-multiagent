@@ -28,3 +28,6 @@ ipch/
 # OS Generated
 .DS_Store
 Thumbs.db
+
+# continue.dev
+.continue/
