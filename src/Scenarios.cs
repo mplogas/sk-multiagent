@@ -23,11 +23,17 @@ namespace Workshop.SemanticKernel.MultiAgent
                 _loggerFactory = loggerFactory;
             }
 
-            public void Initialize(Settings.ScenarioSettings scenarioSettings, Kernel scenarioKernel, List<ChatCompletionAgent> agents)
+            public void Initialize(Settings.ScenarioSettings scenarioSettings, Kernel scenarioKernel, List<ChatCompletionAgent> agents, ChatHistoryLength historyLength)
             {
                 
                 var terminateFunction = AgentGroupChat.CreatePromptFunctionForStrategy(scenarioSettings.TerminationPrompt);
                 var selectionFunction = AgentGroupChat.CreatePromptFunctionForStrategy(scenarioSettings.SelectionPrompt);
+                
+                IChatHistoryReducer? historyReducer = null;
+                if (historyLength == ChatHistoryLength.Reduced)
+                {
+                    historyReducer = new ChatHistoryTruncationReducer(2, 3);
+                }
             
                 chat.ExecutionSettings = new AgentGroupChatSettings 
                 {
@@ -35,12 +41,15 @@ namespace Workshop.SemanticKernel.MultiAgent
                     {
                         Agents = agents.Where(a => scenarioSettings.TerminationAgents.Contains(a.Name)).ToList(),
                         HistoryVariableName = "history",
-                        ResultParser = (result) => result.GetValue<string>()?.Contains(scenarioSettings.TerminationSuccess, StringComparison.InvariantCultureIgnoreCase) ?? false // add more advanced parsing logic here
+                        HistoryReducer = historyReducer,
+                        ResultParser = (result) => result.GetValue<string>()?.Contains(scenarioSettings.TerminationSuccess,
+                            StringComparison.InvariantCultureIgnoreCase) ?? false // add more advanced parsing logic here
                     },
                     SelectionStrategy = new KernelFunctionSelectionStrategy(selectionFunction, scenarioKernel)
                     {
                         AgentsVariableName = "agents",
-                        HistoryVariableName = "history"
+                        HistoryVariableName = "history",
+                        HistoryReducer = historyReducer
                     }
                 };
                 
@@ -90,9 +99,12 @@ namespace Workshop.SemanticKernel.MultiAgent
                     
                     activeAgents.Add(agentSettings);
                 }
+
+                var parseResult = Enum.TryParse(scenario.History, out ChatHistoryLength history);
+                if (!parseResult) history = ChatHistoryLength.Full;
                 
                 var s = new Scenario(loggerFactory);
-                s.Initialize(scenario, KernelFactory.CreateKernel(loggerFactory, settings, scenario.Model, KernelFactory.ConvertFrom(scenario.Backend)), activeAgents);
+                s.Initialize(scenario, KernelFactory.CreateKernel(loggerFactory, settings, scenario.Model, KernelFactory.ConvertFrom(scenario.Backend)), activeAgents, history);
                 _activeScenarios.Add(scenario.Name, s);
             }
             

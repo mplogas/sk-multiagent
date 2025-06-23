@@ -4,11 +4,11 @@
 required: 
 - [x] use numbers for scenarios, and make selection easier
 - [x] allow prompt and file input for case description
-- [ ] update dependencies
-  - [ ] test if Gemini bug is resolved
-- [ ] optimize token usage
-  - [ ] history reducer
-  - [ ] read from result files
+- [x] update dependencies
+  - [-] test if Gemini bug is resolved 
+- [x] optimize token usage
+  - [x] history reducer
+  - [-] read from result files
 
 optional:
 - [ ] smarter programmer role

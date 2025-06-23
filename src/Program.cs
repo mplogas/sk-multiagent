@@ -17,7 +17,7 @@ namespace Workshop.SemanticKernel.MultiAgent
                     .SetMinimumLevel(LogLevel.Information)
                     .AddConsole();
                 // Optional: Add filters if needed later
-                // builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Debug);
+                builder.AddFilter("Microsoft.SemanticKernel", LogLevel.Debug);
             });
             
             var logger = loggerFactory.CreateLogger<Program>();

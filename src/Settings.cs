@@ -9,6 +9,12 @@ namespace Workshop.SemanticKernel.MultiAgent
         Ollama,
         Gemini
     }
+
+    public enum ChatHistoryLength
+    {
+        Full,
+        Reduced
+    }
     
     public class Settings
     {
@@ -53,6 +59,7 @@ namespace Workshop.SemanticKernel.MultiAgent
             public List<string> TerminationAgents { get; set; } = new ();
             public string TerminationSuccess { get; set; } = string.Empty;
             public bool Enabled { get; set; } = true;
+            public string History { get; set; } = string.Empty;
             public string Backend { get; set; } = string.Empty;
             public string Model { get; set; } = string.Empty;
         }
